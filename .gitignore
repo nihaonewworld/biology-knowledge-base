@@ -1,0 +1,7 @@
+/01_Biology/
+/03_Computing/*
+!/03_Computing/Git.md
+!/03_Computing/SQL.md
+/.obsidian/
+/05_Pipelines/snakemake/legacy_2024/
+/99_Assets/unused_images/

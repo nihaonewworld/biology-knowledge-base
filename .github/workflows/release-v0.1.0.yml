@@ -1,0 +1,57 @@
+name: Publish v0.1.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release-v0.1.0.yml
+    tags:
+      - v0.1.0
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-v0.1.0
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Publish initial release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view v0.1.0 >/dev/null 2>&1; then
+            echo "Release v0.1.0 already exists."
+            exit 0
+          fi
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          ## Biology Knowledge Base — v0.1.0
+
+          First versioned release of a personal collection of biology and bioinformatics notes, experimental resources, computational workflows, and public data analyses.
+
+          ### Included
+
+          - Bioinformatics notes and selected computing references.
+          - Experimental protocols and reference resources.
+          - Computational workflows, scripts, and public-data analysis notebooks.
+          - Supporting figures and assets, with saved outputs in many notebooks.
+          - README guidance on reading, running, citing, and providing feedback.
+
+          ### Usage notes
+
+          This release is a snapshot of an evolving collection; completeness varies across topics. Review each workflow's requirements and adapt environments, inputs, paths, and parameters before running it. Further testing and validation may be needed for your data and environment.
+
+          Download the source archive below or clone the repository and check out `v0.1.0`. Preserve the directory structure so local image links continue to work. Saved notebook outputs and figures make the download relatively large.
+
+          Original material is available under the MIT License unless otherwise stated. Third-party materials retain their respective licenses and terms. Please cite original sources and include the release version or commit hash when referencing this collection.
+
+          Report corrections and suggestions through [GitHub Issues](https://github.com/nihaonewworld/biology-knowledge-base/issues).
+          EOF
+          gh release create v0.1.0 --verify-tag --title "v0.1.0 — Initial release" --notes-file "$RUNNER_TEMP/release-notes.md"

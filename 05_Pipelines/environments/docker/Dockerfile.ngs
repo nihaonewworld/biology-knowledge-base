@@ -1,0 +1,27 @@
+FROM miniconda:20250309
+
+USER ubuntu
+
+RUN conda create -n ngstools && \
+	conda install -n ngstools fastqc multiqc RSeQC && \
+	conda install -n ngstools trim-galore trimmomatic umi_tools fastx_toolkit fastp && \
+	conda install -n ngstools samtools bedtools deeptools && \
+	conda install -n ngstools sambamba picard && \
+	conda install -n ngstools bioawk seqkit && \
+	conda install -n ngstools homer meme && \
+	conda install -n ngstools pigz \
+&& conda create -n workflow && \
+    conda install -n workflow snakemake nextflow \
+&& conda create -n dnaseq && \
+	conda install -n dnaseq macs2 idr rseg && \
+	conda install -n dnaseq bwa bowtie bowtie2 && \
+	conda install -n dnaseq bismark bsmap bs-seeker2 && \
+	conda install -n dnaseq chromhmm \
+&& conda create -n rnaseq && \
+	conda install -n rnaseq hisat2 htseq && \
+	conda install -n rnaseq star salmon kallisto && \
+	conda install -n rnaseq subread && \
+	conda install -n rnaseq stringtie && \
+	conda install -n rnaseq rmats \
+&& conda clean -afy
+

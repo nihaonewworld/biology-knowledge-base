@@ -1,0 +1,62 @@
+FROM ubuntu:24.04 AS builder
+
+RUN apt update && apt upgrade -y && \
+	apt install -y curl wget vim pigz && \
+	apt clean && \
+	rm -rf /var/lib/apt/lists/*
+
+WORKDIR /home/ubuntu
+USER ubuntu
+
+SHELL ["/bin/bash", "-c"]
+
+RUN wget -q https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-$(uname -m).sh && \
+	bash Miniconda3-latest-Linux-x86_64.sh -b && \
+	source ~/.bashrc && \
+	rm Miniconda3-latest-Linux-x86_64.sh
+
+ENV PATH="/home/ubuntu/miniconda3/bin:$PATH"
+
+RUN conda init
+
+RUN conda config --set always_yes yes && \
+	conda config --add channels defaults && \
+	conda config --add channels free && \
+	conda config --add channels bioconda && \
+	conda config --add channels conda-forge && \
+	conda config --set show_channel_urls true
+
+# Second step
+FROM ubuntu:24.04
+
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+COPY --from=builder /home/ubuntu /home/ubuntu
+
+WORKDIR /home/ubuntu
+USER ubuntu
+ENV PATH="/home/ubuntu/miniconda3/bin:$PATH"
+
+# Common
+RUN conda create -y -n ngstools && \
+	conda install -y -n ngstools fastqc multiqc rseqc && \
+	conda install -y -n ngstools trim-galore trimmomatic umi_tools seqkit && \
+	conda install -y -n ngstools samtools bedtools deeptools && \
+	conda create -y -n rnaseq && \
+	conda install -y -n rnaseq hisat2 htseq umi_tools && \
+	conda install -y -n rnaseq star salmon kallisto && \
+	conda install -y -n rnaseq subread && \
+	conda install -y -n rnaseq stringtie && \
+	conda create -y -n chipseq && \
+	conda install -y -n chipseq macs2 && \
+	conda install -y -n chipseq bwa bowtie bowtie2 && \
+	conda install -y -n chipseq sambamba picard && \
+	conda install -y -n chipseq rseg && \
+	conda install -y -n chipseq homer meme chromhmm && \
+	conda create -y -n wgbs && \
+	conda install -y -n wgbs bismark bsmap bs-seeker2 && \
+	conda clean -afy
+
+CMD ["/bin/bash"]
+
+
